@@ -1,1 +1,1 @@
-binary-addons binary-addons https://github.com/shamanNS/repo-binary-addons Leia__reduced_set
+binary-addons https://github.com/shamanNS/repo-binary-addons Leia__reduced_set
