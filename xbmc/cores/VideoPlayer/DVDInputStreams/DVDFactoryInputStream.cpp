@@ -145,18 +145,24 @@ std::shared_ptr<CDVDInputStream> CDVDFactoryInputStream::CreateInputStream(IVide
       }
     }
 
-    if (finalFileitem.IsType(".m3u8") || finalFileitem.IsType(".php"))
+    // Alternativa je da se ogranici sa "finalFileitem.IsPVR()"
+
+    std::string hostname = finalFileitem.GetDynURL().GetHostName();
+    bool supportsCUTV = hostname.find("cdn.united.cloud") != std::string::npos ||
+                        hostname.find("morescreens.com") != std::string::npos;
+
+    std::string qString = finalFileitem.GetDynURL().GetOptions();
+    bool isMyServer = qString.find("kanal=") != std::string::npos;
+
+    if (finalFileitem.IsPVR() && (supportsCUTV == true || isMyServer == true))
     {
-      if (fileitem.IsPVRChannelWithArchive() || fileitem.IsEPGWithArchive())
-      {
-        CLog::Log(LOGDEBUG, "%s: CDVDInputStreamFFmpegArchive", __FUNCTION__);
-        return std::shared_ptr<CDVDInputStreamFFmpegArchive>(new CDVDInputStreamFFmpegArchive(finalFileitem));
-      }
-      else
-      {
-        return std::shared_ptr<CDVDInputStreamFFmpeg>(new CDVDInputStreamFFmpeg(finalFileitem));
-      }
+      //std::string mimeType = finalFileitem.GetMimeType();
+      CLog::Log(LOGDEBUG, "%s: CDVDInputStreamFFmpegArchive", __FUNCTION__);
+      return std::shared_ptr<CDVDInputStreamFFmpegArchive>(new CDVDInputStreamFFmpegArchive(finalFileitem));
     }
+
+    if (finalFileitem.IsType(".m3u8"))
+      return std::shared_ptr<CDVDInputStreamFFmpeg>(new CDVDInputStreamFFmpeg(finalFileitem));
 
     if (finalFileitem.GetMimeType() == "application/vnd.apple.mpegurl")
       return std::shared_ptr<CDVDInputStreamFFmpeg>(new CDVDInputStreamFFmpeg(finalFileitem));
